@@ -19,7 +19,8 @@ const errorMiddleware = (err: MiddlewareError, req: Request, res: Response, next
             const message = 'Resource not found';
             error = new Error(message);
             error.statusCode = 404;
-            return res.status(404).json({ message: error.message });
+            res.status(404).json({ message: error.message });
+            return;
         }
 
         // Mongoose duplicate key
@@ -27,7 +28,8 @@ const errorMiddleware = (err: MiddlewareError, req: Request, res: Response, next
             const message = 'Duplicate field value entered';
             error = new Error(message);
             error.statusCode = 400;
-            return res.status(400).json({ message: error.message });
+            res.status(400).json({ message: error.message });
+            return;
         }
 
         // Mongoose validation error
@@ -35,7 +37,8 @@ const errorMiddleware = (err: MiddlewareError, req: Request, res: Response, next
             const message = Object.values(err.errors).map((val: any) => val.message);
             error = new Error(message.join(', '));
             error.statusCode = 400;
-            return res.status(400).json({ message: error.message });
+            res.status(400).json({ message: error.message });
+            return;
         }
 
         res.status(error.statusCode || 500).json({ success: false, error: error.message || 'Server Error' });
