@@ -1,15 +1,6 @@
-import { Request, Response, NextFunction } from 'express';
-
-// Define an interface for the error object passed to the middleware
-interface MiddlewareError extends Error {
-    errors: { [s: string]: unknown; } | ArrayLike<unknown>;
-    code?: number; // For Mongoose error codes like 11000
-    // statusCode could also be part of err if it's set before reaching here
-}
-
-const errorMiddleware = (err: MiddlewareError, req: Request, res: Response, next: NextFunction) => {
+const errorMiddleware = (err, req, res, next) => {
     try {
-        let error: any = { ...err };
+        let error = { ...err };
         error.message = err.message;
 
         console.error(err.message);
@@ -34,7 +25,7 @@ const errorMiddleware = (err: MiddlewareError, req: Request, res: Response, next
 
         // Mongoose validation error
         if (err.name === 'ValidationError') {
-            const message = Object.values(err.errors).map((val: any) => val.message);
+            const message = Object.values(err.errors).map((val) => val.message);
             error = new Error(message.join(', '));
             error.statusCode = 400;
             res.status(400).json({ message: error.message });
