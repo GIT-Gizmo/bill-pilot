@@ -6,7 +6,8 @@
   "scripts": {
     "dev": "nodemon",
     "build": "tsc",
-    "start": "node app.js"
+    "start": "node dist/app.js",
+    "postinstall": "npm run build"
   },
   "dependencies": {
     "bcryptjs": "^3.0.2",
