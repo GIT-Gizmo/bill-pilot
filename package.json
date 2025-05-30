@@ -6,7 +6,7 @@
   "scripts": {
     "dev": "nodemon",
     "build": "tsc",
-    "start": "node app.ts"
+    "start": "node app.js"
   },
   "dependencies": {
     "bcryptjs": "^3.0.2",
