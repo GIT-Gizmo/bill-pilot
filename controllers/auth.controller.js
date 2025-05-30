@@ -4,11 +4,7 @@ import bcrypt from "bcryptjs";
 import jwt from 'jsonwebtoken';
 import { JWT_SECRET } from "../config/env.js";
 
-interface CustomError extends Error {
-    statusCode?: number;
-}
-
-export const signUp = async (req: { body: { name: string; email: string; password: string; }; }, res: any, next: any) => {
+export const signUp = async (req, res, next) => {
     const session = await mongoose.startSession();
     session.startTransaction();
 
@@ -19,7 +15,7 @@ export const signUp = async (req: { body: { name: string; email: string; passwor
         const existingUser = await User.findOne({ email });
 
         if (existingUser) {
-            const error: CustomError = new Error('User already exists with this email');
+            const error = new Error('User already exists with this email');
             error.statusCode = 409;
             throw error;
         }
@@ -33,7 +29,7 @@ export const signUp = async (req: { body: { name: string; email: string; passwor
             throw new Error('JWT_SECRET is not defined');
         }
 
-        const token = jwt.sign({ userId: newUsers[0]._id }, JWT_SECRET as string, { expiresIn: '1d' });
+        const token = jwt.sign({ userId: newUsers[0]._id }, JWT_SECRET, { expiresIn: '1d' });
 
         await session.commitTransaction();
         session.endSession();
@@ -53,7 +49,7 @@ export const signUp = async (req: { body: { name: string; email: string; passwor
     }
 }
 
-export const signIn = async (req: { body: { email: any; password: any; }; }, res: any, next: any) => {
+export const signIn = async (req, res, next) => {
     try {
         const { email, password } = req.body
 
@@ -79,7 +75,7 @@ export const signIn = async (req: { body: { email: any; password: any; }; }, res
 }
 
 
-export const signOut = async (req: any, res: any, next: any) => {
+export const signOut = async (req, res, next) => {
     try {
         // Clear the cookie
         res.clearCookie('token');

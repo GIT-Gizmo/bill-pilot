@@ -1,21 +1,6 @@
 import mongoose from 'mongoose';
 
-interface ISubscription extends mongoose.Document {
-    name: string;
-    price: number;
-    currency: 'USD' | 'NGN' | 'GBP' | 'EUR';
-    frequency: 'daily' | 'weekly' | 'monthly' | 'yearly';
-    category: 'sports' | 'news' | 'entertainment' | 'lifestyle' | 'technology' | 'finance' | 'politics' | 'other';
-    paymentMethod: string;
-    status: 'active' | 'cancelled' | 'expired';
-    startDate: Date;
-    renewalDate?: Date;
-    user: mongoose.Schema.Types.ObjectId;
-    createdAt: Date;
-    updatedAt: Date;
-}
-
-const subscriptionSchema = new mongoose.Schema<ISubscription>({
+const subscriptionSchema = new mongoose.Schema < ISubscription > ({
     name: {
         type: String,
         required: [true, 'Subscription name is required'],
@@ -57,14 +42,14 @@ const subscriptionSchema = new mongoose.Schema<ISubscription>({
         type: Date,
         required: true,
         validate: {
-            validator: (value: Date) => value <= new Date(),
+            validator: (value) => value <= new Date(),
             message: 'Start date must be in the past',
         }
     },
     renewalDate: {
         type: Date,
         validate: {
-            validator: function (this: ISubscription, value: Date) {
+            validator: function (this, value) {
                 return value > this.startDate;
             },
             message: 'Renewal date must be after the start date',
@@ -92,7 +77,7 @@ subscriptionSchema.pre('save', function (next) {
         this.renewalDate.setDate(this.renewalDate.getDate() + renewalPeriods[this.frequency]);
     }
 
-    if (this.renewalDate! < new Date()) {
+    if (this.renewalDate < new Date()) {
         this.status = 'expired';
     }
 
