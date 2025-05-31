@@ -3,7 +3,6 @@ import User from "../models/user.model.js";
 import bcrypt from "bcryptjs";
 import jwt from 'jsonwebtoken';
 import { JWT_SECRET } from "../config/env.js";
-import { CommandSucceededEvent } from "mongodb";
 
 interface CustomError extends Error {
     statusCode?: number;
@@ -96,7 +95,6 @@ export const signIn = async (req: { body: { email: any; password: any; }; }, res
 
 export const signOut = async (req: any, res: any, next: any) => {
     try {
-        // Clear the cookie
         res.clearCookie('token');
         res.status(200).json({ message: 'User signed out successfully' });
         return;

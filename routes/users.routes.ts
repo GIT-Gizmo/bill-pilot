@@ -1,13 +1,22 @@
-import { Router } from 'express';
+import { Router, Request, Response, NextFunction } from 'express';
+import { getUsers, getUser } from '../controllers/user.controller.js';
+import authorize from '../middleware/auth.middleware.js';
 
 const userRouter = Router();
 
-userRouter.get('/', (req, res) => {
-    res.send({ title: 'GET all users' });
-});
+// Just a wrapper function to ensure type compatibility, I know TypeScript is insane and screams at almost everything
+const authMiddleware = (req: Request, res: Response, next: NextFunction): void => {
+    authorize(req, res, next).catch(() => {
+        // The error is already being handled in the authorize middleware so no need to panic bro.
+    });
+};
 
-userRouter.post('/:id', (req, res) => {
-    res.send({ title: 'GET a user details' });
+userRouter.get('/', getUsers);
+
+userRouter.get('/:id', authMiddleware, getUser);
+
+userRouter.post('/', (req, res) => {
+    res.send({ title: 'Create a new user' });
 });
 
 userRouter.delete('/:id', (req, res) => {
