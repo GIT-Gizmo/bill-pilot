@@ -3,6 +3,7 @@ import User from "../models/user.model.js";
 import bcrypt from "bcryptjs";
 import jwt from 'jsonwebtoken';
 import { JWT_SECRET } from "../config/env.js";
+import { CommandSucceededEvent } from "mongodb";
 
 interface CustomError extends Error {
     statusCode?: number;
@@ -60,19 +61,33 @@ export const signIn = async (req: { body: { email: any; password: any; }; }, res
         // Check if user exists
         const existingUser = await User.findOne({ email });
         if (!existingUser) {
-            res.status(400).json({ message: 'User does not exist' });
-            return;
+            const error = new Error('User not found with this email');
+            (error as CustomError).statusCode = 404;
+            throw error;
         }
 
         // Check if password is correct
         const isMatch = await bcrypt.compare(password, existingUser.password);
         if (!isMatch) {
-            res.status(401).json({ message: 'Invalid email or password' });
-            return;
+            const error = new Error('Invalid password');
+            (error as CustomError).statusCode = 401;
+            throw error;
         }
 
+        if (!JWT_SECRET) {
+            throw new Error('JWT_SECRET is not defined');
+        }
 
-        res.status(200).json({ message: 'User signed in successfully' });
+        const token = jwt.sign({ userId: existingUser._id }, JWT_SECRET as string, { expiresIn: '1d' });
+
+        res.status(200).json({
+            success: true,
+            message: 'User signed in successfully',
+            data: {
+                token,
+                user: existingUser
+            }
+        });
     } catch (error) {
         next(error);
     }
