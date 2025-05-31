@@ -1,6 +1,6 @@
 import mongoose from 'mongoose';
 
-interface ISubscription extends mongoose.Document {
+interface Subscription extends mongoose.Document {
     name: string;
     price: number;
     currency: 'USD' | 'NGN' | 'GBP' | 'EUR';
@@ -15,7 +15,7 @@ interface ISubscription extends mongoose.Document {
     updatedAt: Date;
 }
 
-const subscriptionSchema = new mongoose.Schema<ISubscription>({
+const subscriptionSchema = new mongoose.Schema<Subscription>({
     name: {
         type: String,
         required: [true, 'Subscription name is required'],
@@ -64,7 +64,7 @@ const subscriptionSchema = new mongoose.Schema<ISubscription>({
     renewalDate: {
         type: Date,
         validate: {
-            validator: function (this: ISubscription, value: Date) {
+            validator: function (this: Subscription, value: Date) {
                 return value > this.startDate;
             },
             message: 'Renewal date must be after the start date',
@@ -78,9 +78,9 @@ const subscriptionSchema = new mongoose.Schema<ISubscription>({
     }
 }, { timestamps: true })
 
-// 
+// Set the renewal date if not already set
 subscriptionSchema.pre('save', function (next) {
-    if (this.renewalDate) {
+    if (!this.renewalDate) {
         const renewalPeriods = {
             daily: 1,
             weekly: 7,

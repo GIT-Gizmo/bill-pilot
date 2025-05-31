@@ -19,7 +19,10 @@ const authorize = async (req: Request, res: Response, next: NextFunction) => {
             token = req.headers.authorization?.split(' ')[1];
         }
 
-        if (!token) return res.status(401).json({ message: 'Unauthorized access, no token provided' });
+        if (!token) {
+            res.status(401).json({ message: 'Unauthorized access, no token provided' });
+            return;
+        }
 
         const decoded = jwt.verify(token, JWT_SECRET!) as jwt.JwtPayload;
 
