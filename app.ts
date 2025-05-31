@@ -8,12 +8,16 @@ import userRouter from './routes/users.routes.js'
 import subScriptionRouter from './routes/subscriptions.routes.js'
 import connectToDB from './database/mongodb.js'
 import errorMiddleware from './middleware/error.middleware.js'
+import arcjetMiddleware from './middleware/arcjet.middleware.js'
 
 const app = express()
 
 app.use(express.json())
 app.use(express.urlencoded({ extended: true }))
 app.use(cookieParser())
+app.use((req, res, next) => {
+    arcjetMiddleware(req, res, next).catch(next);
+})
 
 app.use('/api/v1/auth', authRouter)
 app.use('/api/v1/users', userRouter)
