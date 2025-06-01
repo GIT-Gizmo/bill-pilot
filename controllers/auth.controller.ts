@@ -15,7 +15,6 @@ export const signUp = async (req: { body: { name: string; email: string; passwor
     try {
         const { name, email, password } = req.body;
 
-        // Check if user already exists
         const existingUser = await User.findOne({ email });
 
         if (existingUser) {
@@ -57,7 +56,6 @@ export const signIn = async (req: { body: { email: any; password: any; }; }, res
     try {
         const { email, password } = req.body
 
-        // Check if user exists
         const existingUser = await User.findOne({ email });
         if (!existingUser) {
             const error = new Error('User not found with this email');
@@ -65,7 +63,6 @@ export const signIn = async (req: { body: { email: any; password: any; }; }, res
             throw error;
         }
 
-        // Check if password is correct
         const isMatch = await bcrypt.compare(password, existingUser.password);
         if (!isMatch) {
             const error = new Error('Invalid password');
