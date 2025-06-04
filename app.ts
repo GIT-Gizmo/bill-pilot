@@ -9,6 +9,7 @@ import subScriptionRouter from './routes/subscriptions.routes.js'
 import connectToDB from './database/mongodb.js'
 import errorMiddleware from './middleware/error.middleware.js'
 import arcjetMiddleware from './middleware/arcjet.middleware.js'
+import workflowRouter from './routes/workflow.routes.js'
 
 const app = express()
 
@@ -22,6 +23,7 @@ app.use((req, res, next) => {
 app.use('/api/v1/auth', authRouter)
 app.use('/api/v1/users', userRouter)
 app.use('/api/v1/subscriptions', subScriptionRouter)
+app.use('/api/v1/workflows', workflowRouter)
 
 app.use(errorMiddleware)
 
