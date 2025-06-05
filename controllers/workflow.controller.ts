@@ -11,9 +11,9 @@ export const sendReminders = serve(async (context: WorkflowContext) => {
     const { subscriptionId } = context.requestPayload as { subscriptionId: string };
     const subscription = await fetchSubscription(context, subscriptionId);
 
-    if (!subscription || !subscription.renewalDate !== 'active') return;
+    if (!subscription || subscription.status !== 'active') return;
 
-    const renewalDate = dayjs(subscription!.renewalDate);
+    const renewalDate = dayjs(subscription.renewalDate);
 
     if (renewalDate.isBefore(dayjs())) {
         console.log(`Subscription ${subscriptionId} is already expired. Stopping workflow.`);
