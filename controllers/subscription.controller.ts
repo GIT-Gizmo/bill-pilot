@@ -23,10 +23,9 @@ export const createSubscription = async (req: Request, res: Response, next: Next
                 'content-type': 'application/json',
             },
             retries: 0,
-            workflowRunId: subscription.id, // Use subscription ID as workflow run ID
         })
 
-        res.status(201).json({ success: true, data: subscription });
+        res.status(201).json({ success: true, data: subscription, workflowRunId });
     } catch (error) {
         next(error)
     }
