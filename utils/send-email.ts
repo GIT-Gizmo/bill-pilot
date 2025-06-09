@@ -41,6 +41,8 @@ export const sendReminderEmail = async ({ to, type, subscription }: SendReminder
         planName: subscription.name,
         price: `${subscription.currency} ${subscription.price} (${subscription.frequency})`,
         paymentMethod: subscription.paymentMethod,
+        accountSettingsLink: `${process.env.CLIENT_URL || 'http://localhost:3000'}/account/settings`,
+        supportLink: `${process.env.CLIENT_URL || 'http://localhost:3000'}/support`,
     };
 
     const subject = template!.generateSubject(mailInfo);
@@ -53,11 +55,8 @@ export const sendReminderEmail = async ({ to, type, subscription }: SendReminder
         html: message,
     };
 
-    try {
-        const info = await transporter.sendMail(mailOptions);
-        console.log("Email sent successfully:", info.response);
-    } catch (error) {
-        console.error("Error sending email:", error);
-        throw error; // Re-throw the error to be caught by the workflow
-    }
+    transporter.sendMail(mailOptions, (error, info) => {
+        if (error) console.log("Error sending email:", error);
+        console.log("Email sent successfully:" + info.response);
+    });
 };

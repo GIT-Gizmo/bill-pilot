@@ -12,27 +12,26 @@ export const sendReminders = serve(async (context: WorkflowContext) => {
     const { subscriptionId } = context.requestPayload as { subscriptionId: string };
     const subscription = await fetchSubscription(context, subscriptionId);
 
-    if (!subscription || subscription.status !== 'active') {
-        console.log(`Subscription ${subscriptionId} is not active or not found. Stopping workflow.`);
-        return;
-    }
+    if (!subscription || subscription.status !== 'active') return;
 
     const renewalDate = dayjs(subscription.renewalDate);
-    const currentDate = dayjs();
 
-    if (renewalDate.isBefore(currentDate)) {
-        console.log(`Subscription ${subscriptionId} is already expired. Stopping workflow.`);
+    if (renewalDate.isBefore(dayjs())) {
+        console.log(`Renewal date has passed for subscription ${subscriptionId}. Stopping workflow.`);
         return;
     }
-
-    console.log(`Starting workflow for subscription ${subscriptionId}, renewal date: ${renewalDate.format()}`);
 
     for (const daysBefore of REMINDERS) {
         const reminderDate = renewalDate.subtract(daysBefore, 'day');
+        const currentDate = dayjs();
 
-        if (reminderDate.isAfter(currentDate)) await sleepUntilReminder(context, `Sleep until ${daysBefore} days before renewal`, reminderDate);
+        if (reminderDate.isAfter(currentDate)) {
+            await sleepUntilReminder(context, `Sleep until ${daysBefore} days before renewal`, reminderDate);
+        }
 
-        await triggerReminder(context, `${daysBefore} days before reminder`, subscription);
+        if (dayjs().isSame(reminderDate, 'day')) {
+            await triggerReminder(context, `${daysBefore} days before reminder`, subscription);
+        }
     }
 })
 
@@ -43,7 +42,7 @@ const fetchSubscription = async (context: WorkflowContext, subscriptionId: strin
 }
 
 const sleepUntilReminder = async (context: WorkflowContext, label: string, date: dayjs.Dayjs) => {
-    console.log(`${label} reminder at ${date}`);
+    console.log(`Sleeping until ${label} reminder at ${date}`);
     await context.sleepUntil(label, date.toDate())
 }
 
@@ -51,16 +50,10 @@ const triggerReminder = async (context: WorkflowContext, label: string, subscrip
     return await context.run(label, async () => {
         console.log(`Triggering ${label} reminder for subscription ${subscription._id}`);
 
-        try {
-            await sendReminderEmail({
-                to: subscription.user.email,
-                type: label,
-                subscription,
-            });
-            console.log(`Successfully sent ${label} email to ${subscription.user.email}`);
-        } catch (error) {
-            console.error(`Failed to send ${label} email:`, error);
-            throw error;
-        }
+        await sendReminderEmail({
+            to: subscription.user.email,
+            type: label,
+            subscription,
+        });
     })
 }
